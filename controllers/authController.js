@@ -4,7 +4,22 @@ import User from "../models/userModel.js";
 
 export const login = async (req, res, next) => {
     try {
-        res.json({msg: "login"});        
+        const {email, password} = req.body;
+        let user = await User.findOne({email}); 
+        if(!user) {
+            return res.status(201).json({msg: "user doesn't exist"});
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Invalid credentials' });
+        }
+
+        const payload = { userId: user._id };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: '1d'
+        });
+
+        res.status(200).json({ token });    
     } catch (error) {
         next(error);
     }
