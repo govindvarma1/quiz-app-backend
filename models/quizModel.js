@@ -7,7 +7,11 @@ const questionSchema = new mongoose.Schema({
     },
     options: {
         type: [String],
-        required: true
+        required: true,
+        validate: {
+            validator: (v) => v.length === 4,
+            message: 'There must be exactly four options.'
+        }
     },
     correctAnswer: {
         type: Number,
