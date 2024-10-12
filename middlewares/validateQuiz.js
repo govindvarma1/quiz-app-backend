@@ -8,7 +8,7 @@ export const validateQuiz = [
         .isArray({ min: 4, max: 4 })
         .withMessage("Each question must have exactly four options"),
     check("questions.*.correctAnswer")
-        .isInt({ min: 1, max: 3 })
+        .isInt()
         .withMessage("Correct answer is required"),
     (req, res, next) => {
         const errors = validationResult(req);

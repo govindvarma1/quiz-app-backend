@@ -1,8 +1,8 @@
 import Quiz from "../models/quizModel.js";
 
 export const createQuiz = async (req, res, next) => {
-    const { title, description, questions } = req.body;
     const userId = req.user;
+    const { title, description, questions } = req.body;
     try {
         const newQuiz =  new Quiz({
             title,
@@ -10,7 +10,20 @@ export const createQuiz = async (req, res, next) => {
             questions,
             createdBy: userId
         });
+        newQuiz.save();
         res.status(201).json({msg: "Created a new quiz successfully", Quiz: newQuiz});
+    } catch (error) {
+        next(error);
+    }
+}
+
+export const getQuizzes = async (req, res, next) => {
+    try {
+        const quizzes = await Quiz.find().populate({
+            path: 'createdBy',
+            select: 'name email -_id'
+        });
+        res.status(201).json({msg: "success", quizzes: quizzes});
     } catch (error) {
         next(error);
     }
