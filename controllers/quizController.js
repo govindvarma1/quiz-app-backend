@@ -1,5 +1,6 @@
 import Quiz from "../models/quizModel.js";
 import Result from "../models/resultModel.js";
+import { formatResults } from "../utils/formatResults.js";
 
 export const createQuiz = async (req, res, next) => {
     const userId = req.user;
@@ -95,18 +96,23 @@ export const takeQuiz = async (req, res) => {
 export const getUserResults = async (req, res, next) => {
     try {
         const { userId } = req.params;
-        const userResults = await Result.find({ userId })
-            .populate({
-                path: 'answers.questionId', 
-                model: 'Question',
-                select: 'text options'
-            });
+
+        const results = await Result.find().populate({
+            path: 'quiz',
+            populate: {
+                path: 'questions',
+                model: 'Question'
+            }
+        }).exec();
+
         
-        if (!userResults || userResults.length === 0) {
+        if (!results || results.length === 0) {
             return res.status(404).json({ msg: "No results found for this user." });
         }
 
-        res.status(200).json({ msg: "success", results: userResults });
+        const formattedResults = formatResults(results);
+
+        res.status(200).json({ msg: "success", results: formattedResults});
     } catch (error) {
         next(error);
     }
