@@ -28,3 +28,16 @@ export const getQuizzes = async (req, res, next) => {
         next(error);
     }
 }
+
+export const getQuizById = async (req, res, next) => {
+    try {
+        let quizId = req.params.id;
+        const quiz = await Quiz.find({_id: quizId}).populate({
+            path: 'createdBy',
+            select: 'name email -_id'
+        })
+        res.status(201).json({msg: 'success', quiz: quiz});
+    } catch (error) {
+        next(error);
+    }
+}
