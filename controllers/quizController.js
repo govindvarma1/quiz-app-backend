@@ -1,4 +1,5 @@
 import Quiz from "../models/quizModel.js";
+import Result from "../models/resultModel.js";
 
 export const createQuiz = async (req, res, next) => {
     const userId = req.user;
@@ -41,3 +42,73 @@ export const getQuizById = async (req, res, next) => {
         next(error);
     }
 }
+
+export const takeQuiz = async (req, res) => {
+    const { quizId } = req.params;
+    const { answers } = req.body;
+    const userId = req.user;    
+
+    try {
+        const quiz = await Quiz.findById(quizId);
+        if (!quiz) {
+            return res.status(404).json({ message: "Quiz not found" });
+        }
+
+        let score = 0;
+        let correctAnswersCount = 0;
+        const totalQuestions = quiz.questions.length;
+        const userAnswers = [];
+
+        quiz.questions.forEach((question, index) => {
+            const userAnswer = answers.find(ans => ans.questionId === question._id.toString());
+            if (userAnswer) {
+                const isCorrect = userAnswer.selectedOption === question.correctAnswer;
+                if (isCorrect) {
+                    score += 1;
+                    correctAnswersCount += 1;
+                }
+                userAnswers.push({
+                    questionId: question._id,
+                    selectedOption: userAnswer.selectedOption,
+                    correctOption: question.correctAnswer
+                });
+            }
+        });
+
+        const result = new Result({
+            quiz: quizId,
+            user: userId,
+            score,
+            totalQuestions,
+            correctAnswers: correctAnswersCount,
+            answers: userAnswers
+        });
+
+        await result.save();
+
+        res.status(201).json({ message: "Quiz submitted successfully", result });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+export const getUserResults = async (req, res, next) => {
+    try {
+        const { userId } = req.params;
+        const userResults = await Result.find({ userId })
+            .populate({
+                path: 'answers.questionId', 
+                model: 'Question',
+                select: 'text options'
+            });
+        
+        if (!userResults || userResults.length === 0) {
+            return res.status(404).json({ msg: "No results found for this user." });
+        }
+
+        res.status(200).json({ msg: "success", results: userResults });
+    } catch (error) {
+        next(error);
+    }
+};
+

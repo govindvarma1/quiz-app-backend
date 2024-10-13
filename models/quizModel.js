@@ -27,9 +27,7 @@ const quizSchema = new mongoose.Schema({
     description: {
         type: String,
     },
-    questions: {
-        type: [questionSchema]
-    },
+    questions: [questionSchema],
     createdBy: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User'
