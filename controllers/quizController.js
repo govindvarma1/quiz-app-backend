@@ -1,3 +1,4 @@
+import { model } from "mongoose";
 import Quiz from "../models/quizModel.js";
 import Result from "../models/resultModel.js";
 import { formatResults } from "../utils/formatResults.js";
@@ -141,4 +142,25 @@ export const getAttemptResult = async (req, res, next) => {
     }
 };
 
+export const getResults = async (req, res, next) => {
+    try {
+        const results = await Result.find().populate({
+            path: 'quiz',
+            populate: {
+                path: 'questions',
+                model: 'Question'
+            }  
+        });
 
+        if(!results || results.length === 0) {
+            return res.status(404).json({ msg: "No results found" });
+        }
+
+        const formattedResults = formatResults(results);
+
+        res.status(200).json({msg: "success", results: formattedResults})
+
+    } catch(error) {
+        next(error);
+    }
+}
