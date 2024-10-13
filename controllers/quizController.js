@@ -46,8 +46,7 @@ export const getQuizById = async (req, res, next) => {
 }
 
 export const takeQuiz = async (req, res) => {
-    const { quizId } = req.params;
-    const { answers } = req.body;
+    const { quizId, answers } = req.body;
     const userId = req.user;    
 
     try {

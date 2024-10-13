@@ -172,6 +172,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 * **Deployment:** The application is currently hosted at `https://quiz-app-backend-ckxm.onrender.com/`.
 * **Demo User:** Anyone can use the following credentials to test the application:
 
-    - **Username:** demouser
-    - **Password:** demopassword
+    - **Username:** demouser@gmail.com
+    - **Password:** 12345678
 
