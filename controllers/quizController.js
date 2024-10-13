@@ -97,7 +97,7 @@ export const getUserResults = async (req, res, next) => {
     try {
         const { userId } = req.params;
 
-        const results = await Result.find().populate({
+        const results = await Result.find({createdBy: userId}).populate({
             path: 'quiz',
             populate: {
                 path: 'questions',
@@ -117,4 +117,28 @@ export const getUserResults = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getAttemptResult = async (req, res, next) => {
+    try {
+        const { attemptId } = req.params;
+        const attemptResult = await Result.findById(attemptId).populate({
+            path: 'quiz',
+            populate: {
+                path: 'questions',
+                model: 'Question'
+            }
+        }).exec();
+
+        if (!attemptResult) {
+            return res.status(404).json({ msg: "Quiz attempt not found." });
+        }
+
+        const formattedResult = formatResults([attemptResult]);
+
+        res.status(200).json({ msg: "success", result: formattedResult[0] });
+    } catch (error) {
+        next(error);
+    }
+};
+
 
